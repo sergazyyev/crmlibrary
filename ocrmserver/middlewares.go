@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
-	"gitlab.alfa-bank.kz/crmw/library/ocrmmodel"
+	"github.com/sergazyyev/crmlibrary/ocrmmodel"
 	"net/http"
 	"strings"
 	"time"

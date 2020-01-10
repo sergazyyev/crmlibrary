@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/sergazyyev/crmlibrary/ocrmerrors"
+	"github.com/sergazyyev/crmlibrary/ocrmmodel"
 	"github.com/sirupsen/logrus"
-	"gitlab.alfa-bank.kz/crmw/library/ocrmerrors"
-	"gitlab.alfa-bank.kz/crmw/library/ocrmmodel"
 	"net/http"
 )
 

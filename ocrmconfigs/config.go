@@ -1,7 +1,7 @@
 package ocrmconfigs
 
 import (
-	"gitlab.alfa-bank.kz/crmw/library/ocrmerrors"
+	"github.com/sergazyyev/crmlibrary/ocrmerrors"
 	"log"
 	"os"
 	"strconv"

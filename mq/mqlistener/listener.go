@@ -1,9 +1,9 @@
 package mqlistener
 
 import (
+	"github.com/sergazyyev/crmlibrary/ocrmerrors"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
-	"gitlab.alfa-bank.kz/crmw/library/ocrmerrors"
 )
 
 type Listener struct {
