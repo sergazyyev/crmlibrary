@@ -1,4 +1,4 @@
-module gitlab.alfa-bank.kz/crmw/library
+module github.com/sergazyyev/crmlibrary
 
 go 1.13
 
