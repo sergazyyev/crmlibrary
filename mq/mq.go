@@ -1,8 +1,8 @@
 package mq
 
 import (
+	"github.com/sergazyyev/crmlibrary/ocrmconfigs"
 	"github.com/streadway/amqp"
-	"gitlab.alfa-bank.kz/crmw/library/ocrmconfigs"
 )
 
 func GetConnection(config *ocrmconfigs.RabbitMqConfig) (*amqp.Connection, error) {
