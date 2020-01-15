@@ -10,7 +10,7 @@ type PostgresDbConfig struct {
 	Username     string `toml:"db_username"`
 	Password     string `toml:"db_password"`
 	MaxIdleConns int    `toml:"max_idle_conns"`
-	MaxOpenConns int    `tom:"max_open_conns"`
+	MaxOpenConns int    `toml:"max_open_conns"`
 }
 
 func (p *PostgresDbConfig) GetConnectionString() string {
