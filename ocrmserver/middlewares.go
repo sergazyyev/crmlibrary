@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	//
 	CtxClaimsKey ctxKey = iota
 	CtxRequestIdKey
 )
