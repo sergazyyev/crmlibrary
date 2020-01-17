@@ -12,12 +12,12 @@ import (
 )
 
 type BaseServer struct {
-	Router *mux.Router
-	JwtKey []byte
+	Router              *mux.Router
+	JwtKey              []byte
 	JwtTokenLiveMinutes int
-	Logger *logrus.Logger
-	UseAuthMidd bool
-	AuthIgnorePaths []string
+	Logger              *logrus.Logger
+	UseAuthMidd         bool
+	AuthIgnorePaths     []string
 }
 
 func (server *BaseServer) Start(port int) error {

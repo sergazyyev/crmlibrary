@@ -13,23 +13,23 @@ func TestFormatPhoneNumber(t *testing.T) {
 		value string
 	}{
 		{
-			name: "plus",
+			name:  "plus",
 			value: "+77078338948",
 		},
 		{
-			name: "skobka",
+			name:  "skobka",
 			value: "+ 7 (707) 83 38 94 8 ",
 		},
 		{
-			name: "probel",
+			name:  "probel",
 			value: "8 (707) - 833 - 89 - 4 - 8 ",
 		},
 		{
-			name: "vosem",
+			name:  "vosem",
 			value: "8 707 833 89-48",
 		},
 		{
-			name: "online",
+			name:  "online",
 			value: "+7(707)-833-8948",
 		},
 	}

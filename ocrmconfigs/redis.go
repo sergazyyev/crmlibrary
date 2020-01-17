@@ -6,17 +6,17 @@ import (
 )
 
 type RedisConfig struct {
-	Host string `toml:"host"`
-	Port int `toml:"port"`
+	Host     string `toml:"host"`
+	Port     int    `toml:"port"`
 	Password string `toml:"password"`
-	Db int `toml:"db"`
+	Db       int    `toml:"db"`
 }
 
 func (r *RedisConfig) GetRedisOptions() *redis.Options {
 	address := fmt.Sprintf("%s:%d", r.Host, r.Port)
 	return &redis.Options{
-		Addr: address,
+		Addr:     address,
 		Password: r.Password,
-		DB: r.Db,
+		DB:       r.Db,
 	}
 }

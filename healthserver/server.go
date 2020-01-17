@@ -9,9 +9,9 @@ import (
 )
 
 type HealthServer struct {
-	router *mux.Router
-	liveFunc http.HandlerFunc
-	readyFunc http.HandlerFunc
+	router     *mux.Router
+	liveFunc   http.HandlerFunc
+	readyFunc  http.HandlerFunc
 	metricFunc http.HandlerFunc
 }
 
