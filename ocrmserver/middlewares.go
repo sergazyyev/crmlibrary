@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	ctxClaimsKey ctxKey = iota
-	ctxRequestIdKey
+	CtxClaimsKey ctxKey = iota
+	CtxRequestIdKey
 )
 
 type ctxKey int8
@@ -57,13 +57,13 @@ func (server *BaseServer) authenticateUser(next http.Handler) http.Handler {
 			return
 		}
 		w.Header().Set("Authorization", tokenString)
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ctxClaimsKey, claims)))
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), CtxClaimsKey, claims)))
 	})
 }
 
 func (server *BaseServer) loggingRequests(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		server.Logger.Tracef("started %s %s remote_address=%s request_id=%s", r.Method, r.RequestURI, r.RemoteAddr, r.Context().Value(ctxRequestIdKey))
+		server.Logger.Tracef("started %s %s remote_address=%s request_id=%s", r.Method, r.RequestURI, r.RemoteAddr, r.Context().Value(CtxRequestIdKey))
 		now := time.Now()
 		rw := &responseWriter{w, http.StatusOK}
 		next.ServeHTTP(rw, r)
@@ -72,7 +72,7 @@ func (server *BaseServer) loggingRequests(next http.Handler) http.Handler {
 			http.StatusText(rw.statusCode),
 			time.Now().Sub(now),
 			r.RemoteAddr,
-			r.Context().Value(ctxRequestIdKey))
+			r.Context().Value(CtxRequestIdKey))
 	})
 }
 
@@ -80,6 +80,6 @@ func (server *BaseServer) setRequestId(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := uuid.New().String()
 		w.Header().Set("X-Request-Id", id)
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ctxRequestIdKey, id)))
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), CtxRequestIdKey, id)))
 	})
 }
