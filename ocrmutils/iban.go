@@ -28,22 +28,21 @@ func CheckIban(iban string) error {
 	mods := ""
 
 	for _, v := range iban {
-		// Get character code point value
 		i := int(v)
-
-		// Check if c is characters A-Z (codepoint 65 - 90)
+		// Check if c is characters A-Z (codepoint 65 - 90 in ASCII)
 		if i > 64 && i < 91 {
 
-			// A=10, B=11 etc...
+			//In ascii characters starts 65 and ends 90
+			//To get A=10, B=11, C=12 etc...
+			//Minus 55 from ascii code
 			i -= 55
-
 			mods += strconv.Itoa(i)
 		} else {
+			//Or get own value as int value of character (to be digits)
 			mods += string(i)
 		}
 	}
 
-	// Create bignum from mod string and perform module
 	bigVal, succees := new(big.Int).SetString(mods, 10)
 	if !succees {
 		return ocrmerrors.New(ocrmerrors.INVALID, "Iban check digits validation failed", "Введенный Iban не верный")

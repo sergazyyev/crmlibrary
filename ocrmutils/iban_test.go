@@ -1,6 +1,7 @@
 package ocrmutils
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -13,4 +14,8 @@ var (
 func TestCheckIban(t *testing.T) {
 	assert.NoError(t, CheckIban(iban))
 	assert.Error(t, CheckIban(iniban))
+}
+
+func TestASCII(t *testing.T) {
+	fmt.Println([]rune("a"))
 }
