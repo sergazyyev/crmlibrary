@@ -1,6 +1,10 @@
 package ocrmutils
 
-import "strings"
+import (
+	"github.com/sergazyyev/crmlibrary/ocrmerrors"
+	"regexp"
+	"strings"
+)
 
 func FormatPhoneNumber(phoneNumber string) string {
 	phoneNumber = GetDigitsFromString(phoneNumber)
@@ -14,4 +18,16 @@ func FormatPhoneNumber(phoneNumber string) string {
 		phoneNumber = ReplaceCharInStringAtIndex(phoneNumber, '7', 0)
 	}
 	return phoneNumber
+}
+
+func IsPhoneValid(phone string) error {
+	pattern := "^[0-9]{11}$"
+	isOk, err := regexp.Match(pattern, []byte(phone))
+	if err != nil {
+		return err
+	}
+	if !isOk {
+		return ocrmerrors.New(ocrmerrors.INVALID, "Phone is not valid", "Телефон не валидный")
+	}
+	return nil
 }
