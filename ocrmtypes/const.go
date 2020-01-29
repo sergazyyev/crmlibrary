@@ -17,6 +17,7 @@ const (
 	SimpleSuccessCode       SimpleResponseCode = "SUCCESS"
 	TmOnlineLead            LeadType           = "TM_ONLINE_LEAD"
 	PartnerLead             LeadType           = "PARTNER_LEAD"
+	RecommendedLead         LeadType           = "RECOMMENDED_LEAD"
 	OfficeOnlineLead        LeadType           = "OFFICE_ONLINE_LEAD"
 	OfficeOnlineAccOpenLead LeadType           = "OFFICE_ONLINE_ACC_OPEN_LEAD"
 	LeadStatusNew           LeadStatus         = "NEW"
