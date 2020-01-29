@@ -15,6 +15,7 @@ const (
 	SimpleWarnCode          SimpleResponseCode = "WARN"
 	SimpleEmptyCode         SimpleResponseCode = "EMPTY"
 	SimpleSuccessCode       SimpleResponseCode = "SUCCESS"
+	RecommendedLead         LeadType           = "RECOMMENDED_LEAD"
 	TmOnlineLead            LeadType           = "TM_ONLINE_LEAD"
 	PartnerLead             LeadType           = "PARTNER_LEAD"
 	OfficeOnlineLead        LeadType           = "OFFICE_ONLINE_LEAD"
