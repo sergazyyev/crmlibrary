@@ -66,7 +66,7 @@ func (server *BaseServer) respondJson(w http.ResponseWriter, status int, data in
 	}
 }
 
-func (server *BaseServer) respondByte(w http.ResponseWriter, status int, data []byte, headers map[string]string) {
+func (server *BaseServer) RespondByte(w http.ResponseWriter, status int, data []byte, headers map[string]string) {
 	if headers != nil && len(headers) > 0 {
 		for k, v := range headers {
 			w.Header().Set(k, v)
