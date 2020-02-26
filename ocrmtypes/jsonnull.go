@@ -248,4 +248,5 @@ func GetNotNilValue(nullable *interface{}) interface{} {
 		value := *nullable
 		return value.(JsonNullTime).Time
 	}
+	return 0
 }
