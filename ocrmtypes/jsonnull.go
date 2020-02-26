@@ -212,37 +212,37 @@ func (j *JsonNullFloat64) UnmarshalJSON(data []byte) error {
 func GetNotNilValue(nullable interface{}) interface{} {
 	switch reflect.TypeOf(nullable) {
 	case reflect.TypeOf(&JsonNullBool{}):
-		if nullable == nil {
+		if reflect.ValueOf(nullable).IsNil() {
 			return false
 		}
 		value := nullable
 		return value.(*JsonNullBool).Bool
 	case reflect.TypeOf(&JsonNullFloat64{}):
-		if nullable == nil {
+		if reflect.ValueOf(nullable).IsNil() {
 			return float64(0.0)
 		}
 		value := nullable
 		return value.(*JsonNullFloat64).Float64
 	case reflect.TypeOf(&JsonNullInt32{}):
-		if nullable == nil {
+		if reflect.ValueOf(nullable).IsNil() {
 			return int32(0)
 		}
 		value := nullable
 		return value.(*JsonNullInt32).Int32
 	case reflect.TypeOf(&JsonNullInt64{}):
-		if nullable == nil {
+		if reflect.ValueOf(nullable).IsNil() {
 			return int64(0)
 		}
 		value := nullable
 		return value.(*JsonNullInt64).Int64
 	case reflect.TypeOf(&JsonNullString{}):
-		if nullable == nil {
+		if reflect.ValueOf(nullable).IsNil() {
 			return ""
 		}
 		value := nullable
 		return value.(*JsonNullString).String
 	case reflect.TypeOf(&JsonNullTime{}):
-		if nullable == nil {
+		if reflect.ValueOf(nullable).IsNil() {
 			return time.Unix(0, 0)
 		}
 		value := nullable
