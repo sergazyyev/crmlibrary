@@ -11,6 +11,30 @@ const (
 	GroupTypeChannel = "CHANNEL"
 )
 
+//All ad_groups
+const (
+	//Block
+	AdGroupBsBmb = "CRM_BS_BMB"
+	AdGroupBsBkb = "CRM_BS_BKB"
+	AdGroupBsBrb = "CRM_BS_BRB"
+	AdGroupBsBsb = "CRM_BS_BSB"
+
+	//Channel
+	AdGroupChPole       = "CRM_CH_POLE"
+	AdGroupChOnline     = "CRM_CH_ONLINE"
+	AdGroupChAgent      = "CRM_CH_AGENT"
+	AdGroupChTm         = "CRM_CH_TM"
+	AdGroupChController = "CRM_CH_CONTROLLER"
+	AdGroupChCallCenter = "CRM_CH_CALLCENTER"
+	AdGroupChUpm        = "CRM_CH_UPM"
+
+	//Role
+	AdGroupRlEmployee = "CRM_RL_EMPLOYEE"
+	AdGroupRlAnalytic = "CRM_RL_ANALYTIC"
+	AdGroupRlManager  = "CRM_RL_MANAGER"
+	AdGroupRlChief    = "CRM_RL_CHIEF"
+)
+
 type Claims struct {
 	User *User `json:"user"`
 	*jwt.StandardClaims
