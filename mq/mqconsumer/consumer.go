@@ -17,6 +17,7 @@ type Listener struct {
 	queueName       string
 	exchangeName    string
 	exchangeType    string
+	bindKeys        []string
 	isReady         bool
 	done            chan bool
 	channel         *amqp.Channel
@@ -176,6 +177,17 @@ func (ls *Listener) declare() error {
 		ls.session.logger.Debugf("Error when declare queue, err: %v", err)
 		return err
 	}
+
+	if ls.bindKeys != nil && len(ls.bindKeys) > 0 {
+		for _, key := range ls.bindKeys {
+			err := ls.bindWithKey(key)
+			if err != nil {
+				ls.session.logger.Debugf("Error when bind key for queue, err: %v", err)
+				return err
+			}
+		}
+	}
+
 	ls.queueName = queue.Name
 
 	ls.isReady = true
@@ -183,7 +195,7 @@ func (ls *Listener) declare() error {
 	return nil
 }
 
-func (ls *Listener) BindWithKey(key string) error {
+func (ls *Listener) bindWithKey(key string) error {
 	return ls.channel.QueueBind(
 		ls.queueName,
 		key,
