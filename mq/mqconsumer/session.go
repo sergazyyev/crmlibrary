@@ -87,7 +87,7 @@ func (s *Session) changeConnection(conn *amqp.Connection) {
 	s.connection.NotifyClose(s.notifyConnClose)
 }
 
-func (s *Session) newListener(queueName, exchangeName, exchangeType string) (*Listener, error) {
+func (s *Session) newListener(queueName, exchangeName, exchangeType string, bindKeys []string) (*Listener, error) {
 	if !s.isReady {
 		return nil, ocrmerrors.New(ocrmerrors.INVALID, "Session is unready", "Не создана сессия для сервера amqp")
 	}
@@ -98,6 +98,7 @@ func (s *Session) newListener(queueName, exchangeName, exchangeType string) (*Li
 		queueName:    queueName,
 		exchangeName: exchangeName,
 		exchangeType: exchangeType,
+		bindKeys:     bindKeys,
 	}
 
 	s.listeners[queueName] = listener
@@ -105,7 +106,7 @@ func (s *Session) newListener(queueName, exchangeName, exchangeType string) (*Li
 	return listener, nil
 }
 
-func (s *Session) Listener(queueName, exchangeName, exchangeType string) (*Listener, error) {
+func (s *Session) Listener(queueName, exchangeName, exchangeType string, bindKeys []string) (*Listener, error) {
 	if !s.isReady {
 		return nil, ocrmerrors.New(ocrmerrors.INVALID, "Session is unready", "Не создана сессия для сервера amqp")
 	}
@@ -116,7 +117,7 @@ func (s *Session) Listener(queueName, exchangeName, exchangeType string) (*Liste
 
 	listener, ok := s.listeners[queueName]
 	if !ok {
-		return s.newListener(queueName, exchangeName, exchangeType)
+		return s.newListener(queueName, exchangeName, exchangeType, bindKeys)
 	} else {
 		return listener, nil
 	}
