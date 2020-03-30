@@ -39,12 +39,6 @@ func (ls *Listener) init(conn *amqp.Connection) error {
 		return err
 	}
 
-	err = ch.Confirm(false)
-	if err != nil {
-		ls.session.logger.Debugf("Error when set confirm mod to channel, err: %v", err)
-		return err
-	}
-
 	ls.changeChannel(ch)
 
 	if err := ls.declare(); err != nil {

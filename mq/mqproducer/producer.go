@@ -14,6 +14,7 @@ type Sender struct {
 	connection      *amqp.Connection
 	channel         *amqp.Channel
 	logger          *logrus.Logger
+	isConfirmMode   bool
 	notifyChanClose chan *amqp.Error
 	notifyConnClose chan *amqp.Error
 	notifyConfirm   chan amqp.Confirmation
@@ -104,10 +105,12 @@ func (sr *Sender) init(conn *amqp.Connection) error {
 		return err
 	}
 
-	err = ch.Confirm(false)
-	if err != nil {
-		sr.logger.Debugf("Error when set confirm mod to channel, err: %v", err)
-		return err
+	if sr.isConfirmMode {
+		err = ch.Confirm(false)
+		if err != nil {
+			sr.logger.Debugf("Error when set confirm mod to channel, err: %v", err)
+			return err
+		}
 	}
 
 	sr.changeChannel(ch)
@@ -119,9 +122,11 @@ func (sr *Sender) init(conn *amqp.Connection) error {
 func (sr *Sender) changeChannel(channel *amqp.Channel) {
 	sr.channel = channel
 	sr.notifyChanClose = make(chan *amqp.Error)
-	sr.notifyConfirm = make(chan amqp.Confirmation, 1)
 	sr.channel.NotifyClose(sr.notifyChanClose)
-	sr.channel.NotifyPublish(sr.notifyConfirm)
+	if sr.isConfirmMode {
+		sr.notifyConfirm = make(chan amqp.Confirmation, 1)
+		sr.channel.NotifyPublish(sr.notifyConfirm)
+	}
 }
 
 func (sr *Sender) changeConnection(connection *amqp.Connection) {
@@ -151,7 +156,7 @@ func (sr *Sender) Close() error {
 	return nil
 }
 
-func New(addr string, logLvl string) (*Sender, error) {
+func New(addr string, logLvl string, confirmMode bool) (*Sender, error) {
 	conn, err := amqp.Dial(addr)
 	if err != nil {
 		return nil, err
@@ -171,8 +176,9 @@ func New(addr string, logLvl string) (*Sender, error) {
 	logger.SetLevel(lvl)
 
 	sr := &Sender{
-		logger: logger,
-		done:   make(chan bool),
+		logger:        logger,
+		done:          make(chan bool),
+		isConfirmMode: confirmMode,
 	}
 
 	go sr.handleReconnect(addr)
@@ -181,46 +187,44 @@ func New(addr string, logLvl string) (*Sender, error) {
 	return sr, nil
 }
 
-func (sr *Sender) UnsafeSendToQueue(queueName string, data amqp.Publishing) error {
-	if !sr.isReady {
-		return ocrmerrors.New(ocrmerrors.INVALID, "Connection or channel with server not initialized", "Соеденение с сервером не установлено")
-	}
+func (sr *Sender) sendToQueue(queueName string, data amqp.Publishing) error {
 	sr.logger.Tracef("Trying send message: %s", string(data.Body))
 	sr.logger.Debugf("Trying send message")
 	return sr.channel.Publish("", queueName, false, false, data)
 }
 
-func (sr *Sender) SafeSendToQueue(queueName string, data amqp.Publishing) error {
+func (sr *Sender) SendToQueue(queueName string, data amqp.Publishing) error {
 	if !sr.isReady {
 		return ocrmerrors.New(ocrmerrors.INVALID, "Connection or channel with server not initialized", "Соеденение с сервером не установлено")
 	}
-	for {
-		err := sr.UnsafeSendToQueue(queueName, data)
-		if err != nil {
-			sr.logger.Errorf("Push failed. Retrying...")
+	if !sr.isConfirmMode {
+		return sr.sendToQueue(queueName, data)
+	} else {
+		for {
+			err := sr.sendToQueue(queueName, data)
+			if err != nil {
+				sr.logger.Errorf("Push failed. Retrying...")
+				select {
+				case <-sr.done:
+					return ocrmerrors.New(ocrmerrors.INTERNAL, "Shutdown command takes", "Получена команда остановки")
+				case <-time.After(resendDelay):
+				}
+				continue
+			}
 			select {
-			case <-sr.done:
-				return ocrmerrors.New(ocrmerrors.INTERNAL, "Shutdown command takes", "Получена команда остановки")
+			case confirm := <-sr.notifyConfirm:
+				if confirm.Ack {
+					sr.logger.Debugf("Push message confirmed!")
+					return nil
+				}
 			case <-time.After(resendDelay):
 			}
-			continue
+			sr.logger.Debugf("Push didn't confirm. Retrying...")
 		}
-		select {
-		case confirm := <-sr.notifyConfirm:
-			if confirm.Ack {
-				sr.logger.Debugf("Push message confirmed!")
-				return nil
-			}
-		case <-time.After(resendDelay):
-		}
-		sr.logger.Debugf("Push didn't confirm. Retrying...")
 	}
 }
 
-func (sr *Sender) UnsafeSendToExchange(exchangeName string, data amqp.Publishing) error {
-	if !sr.isReady {
-		return ocrmerrors.New(ocrmerrors.INVALID, "Connection or channel with server not initialized", "Соеденение с сервером не установлено")
-	}
+func (sr *Sender) sendToExchange(exchangeName string, data amqp.Publishing) error {
 	sr.logger.Tracef("Trying send message: %s", string(data.Body))
 	sr.logger.Debugf("Trying send message")
 	return sr.channel.Publish(exchangeName, "", false, false, data)
@@ -230,61 +234,66 @@ func (sr *Sender) SafeSendToExchange(exchangeName string, data amqp.Publishing) 
 	if !sr.isReady {
 		return ocrmerrors.New(ocrmerrors.INVALID, "Connection or channel with server not initialized", "Соеденение с сервером не установлено")
 	}
-	for {
-		err := sr.channel.Publish(exchangeName, "", false, false, data)
-		if err != nil {
-			sr.logger.Errorf("Push failed. Retrying...")
+	if !sr.isConfirmMode {
+		return sr.sendToExchange(exchangeName, data)
+	} else {
+		for {
+			err := sr.sendToExchange(exchangeName, data)
+			if err != nil {
+				sr.logger.Errorf("Push failed. Retrying...")
+				select {
+				case <-sr.done:
+					return ocrmerrors.New(ocrmerrors.INTERNAL, "Shutdown command takes", "Получена команда остановки")
+				case <-time.After(resendDelay):
+				}
+				continue
+			}
 			select {
-			case <-sr.done:
-				return ocrmerrors.New(ocrmerrors.INTERNAL, "Shutdown command takes", "Получена команда остановки")
+			case confirm := <-sr.notifyConfirm:
+				if confirm.Ack {
+					sr.logger.Debugf("Push message confirmed!")
+					return nil
+				}
 			case <-time.After(resendDelay):
 			}
-			continue
+			sr.logger.Debugf("Push didn't confirm. Retrying...")
 		}
-		select {
-		case confirm := <-sr.notifyConfirm:
-			if confirm.Ack {
-				sr.logger.Debugf("Push message confirmed!")
-				return nil
-			}
-		case <-time.After(resendDelay):
-		}
-		sr.logger.Debugf("Push didn't confirm. Retrying...")
 	}
 }
 
-func (sr *Sender) UnsafeSendToExchangeWithKey(exchangeName, key string, data amqp.Publishing) error {
-	if !sr.isReady {
-		return ocrmerrors.New(ocrmerrors.INVALID, "Connection or channel with server not initialized", "Соеденение с сервером не установлено")
-	}
+func (sr *Sender) sendToExchangeWithKey(exchangeName, key string, data amqp.Publishing) error {
 	sr.logger.Tracef("Trying send message: %s", string(data.Body))
 	sr.logger.Debugf("Trying send message")
 	return sr.channel.Publish(exchangeName, key, false, false, data)
 }
 
-func (sr *Sender) SafeSendToExchangeWithKey(exchangeName, key string, data amqp.Publishing) error {
+func (sr *Sender) SendToExchangeWithKey(exchangeName, key string, data amqp.Publishing) error {
 	if !sr.isReady {
 		return ocrmerrors.New(ocrmerrors.INVALID, "Connection or channel with server not initialized", "Соеденение с сервером не установлено")
 	}
-	for {
-		err := sr.channel.Publish(exchangeName, key, false, false, data)
-		if err != nil {
-			sr.logger.Errorf("Push failed. Retrying...")
+	if !sr.isConfirmMode {
+		return sr.sendToExchangeWithKey(exchangeName, key, data)
+	} else {
+		for {
+			err := sr.sendToExchangeWithKey(exchangeName, key, data)
+			if err != nil {
+				sr.logger.Errorf("Push failed. Retrying...")
+				select {
+				case <-sr.done:
+					return ocrmerrors.New(ocrmerrors.INTERNAL, "Shutdown command takes", "Получена команда остановки")
+				case <-time.After(resendDelay):
+				}
+				continue
+			}
 			select {
-			case <-sr.done:
-				return ocrmerrors.New(ocrmerrors.INTERNAL, "Shutdown command takes", "Получена команда остановки")
+			case confirm := <-sr.notifyConfirm:
+				if confirm.Ack {
+					sr.logger.Debugf("Push message confirmed!")
+					return nil
+				}
 			case <-time.After(resendDelay):
 			}
-			continue
+			sr.logger.Debugf("Push didn't confirm. Retrying...")
 		}
-		select {
-		case confirm := <-sr.notifyConfirm:
-			if confirm.Ack {
-				sr.logger.Debugf("Push message confirmed!")
-				return nil
-			}
-		case <-time.After(resendDelay):
-		}
-		sr.logger.Debugf("Push didn't confirm. Retrying...")
 	}
 }
