@@ -21,3 +21,22 @@ func (a *BasicAuthenticateConf) GetRequestMetadata(context.Context, ...string) (
 func (a *BasicAuthenticateConf) RequireTransportSecurity() bool {
 	return false
 }
+
+type UserCredential struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func (a *UserCredential) GetBasicAuthHeader() map[string]string {
+	auth := a.Username + ":" + a.Password
+	enc := base64.StdEncoding.EncodeToString([]byte(auth))
+	return map[string]string{
+		"authorization": "Basic " + enc,
+	}
+}
+
+func (a *UserCredential) GetBasicAuthToken() string {
+	auth := a.Username + ":" + a.Password
+	enc := base64.StdEncoding.EncodeToString([]byte(auth))
+	return enc
+}
