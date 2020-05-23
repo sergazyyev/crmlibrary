@@ -176,11 +176,7 @@ func (j *JsonNullTime) UnmarshalJSON(data []byte) error {
 
 func (j *JsonNullTime) GetDbTimeWithLocal() *JsonNullTime {
 	if j.Valid {
-		if j.Time.Location() == nil {
-			return NewJsonNullTime(time.Date(j.Time.Year(), j.Time.Month(), j.Time.Day(), j.Time.Hour(), j.Time.Minute(), j.Time.Second(), j.Time.Nanosecond(), time.Local))
-		} else {
-			return j
-		}
+		return NewJsonNullTime(time.Date(j.Time.Year(), j.Time.Month(), j.Time.Day(), j.Time.Hour(), j.Time.Minute(), j.Time.Second(), j.Time.Nanosecond(), time.Local))
 	} else {
 		return nil
 	}
