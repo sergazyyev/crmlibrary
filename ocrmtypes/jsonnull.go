@@ -174,6 +174,18 @@ func (j *JsonNullTime) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (j *JsonNullTime) GetDbTimeWithLocal() time.Time {
+	if j.Valid {
+		if j.Time.Location() == nil {
+			return time.Date(j.Time.Year(), j.Time.Month(), j.Time.Day(), j.Time.Hour(), j.Time.Minute(), j.Time.Second(), j.Time.Nanosecond(), time.Local)
+		} else {
+			return j.Time
+		}
+	} else {
+		return time.Time{}
+	}
+}
+
 type JsonNullFloat64 struct {
 	sql.NullFloat64
 }
