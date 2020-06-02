@@ -1,8 +1,9 @@
 package ocrmmodel
 
 import (
+	"fmt"
+
 	"github.com/dgrijalva/jwt-go"
-	"github.com/sergazyyev/crmlibrary/ocrmerrors"
 )
 
 const (
@@ -63,21 +64,29 @@ type Module struct {
 	Level int    `json:"level"`
 }
 
-func (claims *Claims) GetUserGroupsByClaims() (block string, role string, channel string, err error) {
+func (claims *Claims) GetUserGroupsByClaims() (block string, role string, channel string) {
 	groups := claims.User.Groups
 	for _, group := range groups {
 		switch group.Type {
 		case GroupTypeBlock:
-			block = group.Name
+			if block != "" {
+				block = fmt.Sprintf("%s,%s", block, group.Name)
+			} else {
+				block = group.Name
+			}
 		case GroupTypeChannel:
-			channel = group.Name
+			if channel != "" {
+				channel = fmt.Sprintf("%s,%s", channel, group.Name)
+			} else {
+				channel = group.Name
+			}
 		case GroupTypeRole:
-			role = group.Name
+			if role != "" {
+				role = fmt.Sprintf("%s,%s", role, group.Name)
+			} else {
+				role = group.Name
+			}
 		}
-	}
-	if block == "" || role == "" || channel == "" {
-		err = ocrmerrors.New(ocrmerrors.INVALID, "Can't parse users roles by token", "Невозможно распарсить роли пользователя по токену")
-		return
 	}
 	return
 }
