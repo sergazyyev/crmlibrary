@@ -200,14 +200,19 @@ func (ls *Listener) bindWithKey(key string) error {
 }
 
 func (ls *Listener) consume(ctx context.Context) {
-	for msg := range ls.stream {
-		if ls.handleAsc {
-			ls.session.logger.Tracef("Start handle in new goroutine message: %s", string(msg.Body))
-			go ls.handler.HandleMessage(msg)
-		} else {
-			ls.session.logger.Tracef("Start handle message: %s", string(msg.Body))
-			ls.handler.HandleMessage(msg)
-			ls.session.logger.Tracef("End handle message: %s", string(msg.Body))
+	for {
+		select {
+		case msg := <-ls.stream:
+			if ls.handleAsc {
+				ls.session.logger.Tracef("Start handle in new goroutine message: %s", string(msg.Body))
+				go ls.handler.HandleMessage(msg)
+			} else {
+				ls.session.logger.Tracef("Start handle message: %s", string(msg.Body))
+				ls.handler.HandleMessage(msg)
+				ls.session.logger.Tracef("End handle message: %s", string(msg.Body))
+			}
+		case <-ctx.Done():
+			return
 		}
 	}
 }
