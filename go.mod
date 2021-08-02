@@ -3,8 +3,8 @@ module github.com/sergazyyev/crmlibrary
 go 1.13
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-redis/redis/v7 v7.0.0-beta.5
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.3

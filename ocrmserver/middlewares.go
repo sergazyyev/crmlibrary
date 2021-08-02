@@ -3,7 +3,7 @@ package ocrmserver
 import (
 	"context"
 	"errors"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/sergazyyev/crmlibrary/ocrmmodel"
 	"net/http"
